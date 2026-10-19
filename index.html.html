@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Financiero, Punto de Equilibrio - Contabilidad II</title>
+    <!-- Librería para generar la gráfica -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #08032037;
+            margin: 20px;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Título con Análisis Financiero pequeño y Punto de Equilibrio grande */
+        .titulo-seccion {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .subtitulo-analisis {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #7f8c8d;
+            margin: 0;
+            font-weight: 600;
+        }
+        .titulo-principal {
+            font-size: 32px;
+            color: #2c3e50;
+            margin: 5px 0 0 0;
+            font-weight: bold;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #343a5e;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-calcular {
+            flex: 2;
+            padding: 12px;
+            background-color: #2797ae;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-calcular:hover {
+            background-color: yellowgreen;
+        }
+        .btn-limpiar {
+            flex: 1;
+            padding: 12px;
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-limpiar:hover {
+            background-color: #c0392b;
+        }
+        .results {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e8f8f5;
+            border-radius: 5px;
+            display: none;
+        }
+        .results p {
+            font-size: 18px;
+            margin: 8px 0;
+            color: #16a085;
+        }
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: right;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            font-size: 14px;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+            text-align: center;
+        }
+        td:first-child {
+            text-align: left;
+            font-weight: bold;
+            background-color: #ecf0f1;
+        }
+        .highlight-pe {
+            background-color: #d4efdf !important;
+            font-weight: bold;
+        }
+        canvas {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Encabezado corregido -->
+    <div class="titulo-seccion">
+        <p class="subtitulo-analisis">Análisis Financiero</p>
+        <h1 class="titulo-principal">Punto de Equilibrio</h1>
+    </div>
+    
+    <!-- Orden de campos reordenados -->
+    <div class="form-group">
+        <label for="nombreEmpresa">Nombre de la Empresa o Producto:</label>
+        <input type="text" id="nombreEmpresa" placeholder="Ej. Panadería El Trigal">
+    </div>
+
+    <div class="form-group">
+        <label for="precioVenta">Precio de Venta por Unidad (Q):</label>
+        <input type="text" id="precioVenta" placeholder="Ej. 25">
+    </div>
+
+    <div class="form-group">
+        <label for="costoVariable">Costo Variable por Unidad (Q):</label>
+        <input type="text" id="costoVariable" placeholder="Ej. 15">
+    </div>
+
+    <div class="form-group">
+        <label for="costosFijos">Costos Fijos Totales (Q):</label>
+        <input type="text" id="costosFijos" placeholder="Ej. 5000">
+    </div>
+
+    <div class="button-group">
+        <button type="button" id="btnCalcular" class="btn-calcular">Calcular, Graficar y Generar Tabla</button>
+        <button type="button" id="btnLimpiar" class="btn-limpiar">Limpiar Casillas</button>
+    </div>
+
+    <div class="results" id="resultados">
+        <h2 id="tituloEmpresa">Resultados</h2>
+        <p><strong>Margen de Contribución Unitario:</strong> Q <span id="resMargen">0.00</span></p>
+        <p><strong>Punto de Equilibrio en Unidades:</strong> <span id="resUnidades">0</span> unidades</p>
+        <p><strong>Punto de Equilibrio en Quetzales:</strong> Q <span id="resQuetzales">0.00</span></p>
+    </div>
+
+    <div class="table-container" id="seccionTabla">
+        <h3 id="subtituloTabla">Comportamiento por Nivel de Ventas</h3>
+        <table id="tablaValores"></table>
+    </div>
+
+    <canvas id="graficaEquilibrio"></canvas>
+</div>
+
+<script>
+    var miGrafica = null;
+
+    function obtenerNumero(id) {
+        var el = document.getElementById(id);
+        if (!el) return NaN;
+        var val = el.value.trim().replace(',', '.');
+        return parseFloat(val);
+    }
+
+    function calcularPuntoEquilibrio() {
+        try {
+            var empresaEl = document.getElementById('nombreEmpresa');
+            var empresa = empresaEl ? empresaEl.value.trim() : "";
+            
+            var cf = obtenerNumero('costosFijos');
+            var pv = obtenerNumero('precioVenta');
+            var cv = obtenerNumero('costoVariable');
+
+            if (isNaN(cf) || isNaN(pv) || isNaN(cv)) {
+                alert("Por favor asegúrate de llenar todos los campos numéricos (Costos Fijos, Precio de Venta y Costo Variable).");
+                return;
+            }
+
+            if (pv <= cv) {
+                alert("El precio de venta debe ser mayor al costo variable por unidad.");
+                return;
+            }
+
+            var margenContribucion = pv - cv;
+            var peUnidades = cf / margenContribucion;
+            var peQuetzales = peUnidades * pv;
+
+            if (empresa !== "") {
+                document.getElementById('tituloEmpresa').textContent = 'Resultados: ' + empresa;
+                document.getElementById('subtituloTabla').textContent = 'Comportamiento por Nivel de Ventas - ' + empresa;
+            } else {
+                document.getElementById('tituloEmpresa').textContent = 'Resultados';
+                document.getElementById('subtituloTabla').textContent = 'Comportamiento por Nivel de Ventas';
+            }
+
+            document.getElementById('resMargen').textContent = margenContribucion.toFixed(2);
+            document.getElementById('resUnidades').textContent = peUnidades.toLocaleString('es-GT', { maximumFractionDigits: 2 });
+            document.getElementById('resQuetzales').textContent = peQuetzales.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('resultados').style.display = 'block';
+
+            var paso = Math.round(peUnidades * 0.16) || 1000; 
+            var nivelesUnidades = [
+                Math.max(0, peUnidades - (paso * 2)),
+                Math.max(0, peUnidades - paso),
+                peUnidades,
+                peUnidades + paso,
+                peUnidades + (paso * 2)
+            ];
+
+            var htmlTabla = '<thead><tr><th>Concepto</th>' +
+                '<th>' + nivelesUnidades[0].toLocaleString('es-GT') + ' u</th>' +
+                '<th>' + nivelesUnidades[1].toLocaleString('es-GT') + ' u</th>' +
+                '<th class="highlight-pe">' + nivelesUnidades[2].toLocaleString('es-GT') + ' u (PE)</th>' +
+                '<th>' + nivelesUnidades[3].toLocaleString('es-GT') + ' u</th>' +
+                '<th>' + nivelesUnidades[4].toLocaleString('es-GT') + ' u</th>' +
+                '</tr></thead><tbody>';
+
+            var filas = [
+                { nombre: 'Ventas (Q)', calc: function(u) { return u * pv; } },
+                { nombre: '(-) Costos Variables (Q)', calc: function(u) { return u * cv; } },
+                { nombre: '(=) Margen de Contribución (Q)', calc: function(u) { return (u * pv) - (u * cv); } },
+                { nombre: '(-) Costos Fijos (Q)', calc: function(u) { return cf; } },
+                { nombre: '(=) Utilidad / Pérdida (Q)', calc: function(u) { return ((u * pv) - (u * cv)) - cf; } }
+            ];
+
+            filas.forEach(function(fila) {
+                htmlTabla += '<tr><td>' + fila.nombre + '</td>';
+                nivelesUnidades.forEach(function(u, idx) {
+                    var valor = fila.calc(u);
+                    var esPE = (idx === 2);
+                    var clasePE = esPE ? 'class="highlight-pe"' : '';
+                    
+                    var valorFormateado = valor.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    if (valor < 0) {
+                        valorFormateado = '(Q ' + Math.abs(valor).toLocaleString('es-GT', { minimumFractionDigits: 2 }) + ')';
+                    } else {
+                        valorFormateado = 'Q ' + valorFormateado;
+                    }
+
+                    htmlTabla += '<td ' + clasePE + '>' + valorFormateado + '</td>';
+                });
+                htmlTabla += '</tr>';
+            });
+
+            htmlTabla += '</tbody>';
+            document.getElementById('tablaValores').innerHTML = htmlTabla;
+            document.getElementById('seccionTabla').style.display = 'block';
+
+            if (typeof Chart !== 'undefined') {
+                var maxUnidades = Math.ceil(peUnidades * 2);
+                var incrementoGrafica = Math.ceil(maxUnidades / 8) || 1;
+
+                var etiquetas = [];
+                var datosVentas = [];
+                var datosCostosTotales = [];
+                var datosCostosFijos = [];
+
+                for (var u = 0; u <= maxUnidades; u += incrementoGrafica) {
+                    etiquetas.push(u.toLocaleString('es-GT') + ' u');
+                    datosVentas.push(u * pv);
+                    datosCostosTotales.push(cf + (u * cv));
+                    datosCostosFijos.push(cf);
+                }
+
+                var canvas = document.getElementById('graficaEquilibrio');
+                if (canvas) {
+                    var ctx = canvas.getContext('2d');
+                    if (miGrafica) {
+                        miGrafica.destroy();
+                    }
+
+                    var tituloGrafica = empresa !== "" ? 'Gráfica del Punto de Equilibrio - ' + empresa : 'Gráfica del Punto de Equilibrio';
+
+                    miGrafica = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: etiquetas,
+                            datasets: [
+                                {
+                                    label: 'Ventas (Ingresos)',
+                                    data: datosVentas,
+                                    borderColor: '#27ae60',
+                                    backgroundColor: '#27ae60',
+                                    fill: false
+                                },
+                                {
+                                    label: 'Costos Totales',
+                                    data: datosCostosTotales,
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: '#e74c3c',
+                                    fill: false
+                                },
+                                {
+                                    label: 'Costos Fijos',
+                                    data: datosCostosFijos,
+                                    borderColor: '#f39c12',
+                                    borderDash: [5, 5],
+                                    fill: false
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: tituloGrafica
+                                }
+                            },
+                            scales: {
+                                y: { title: { display: true, text: 'Quetzales (Q)' } },
+                                x: { title: { display: true, text: 'Unidades' } }
+                            }
+                        }
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Ocurrió un error al procesar los datos: " + error.message);
+        }
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('nombreEmpresa').value = '';
+        document.getElementById('costosFijos').value = '';
+        document.getElementById('precioVenta').value = '';
+        document.getElementById('costoVariable').value = '';
+
+        document.getElementById('resultados').style.display = 'none';
+        document.getElementById('seccionTabla').style.display = 'none';
+
+        if (miGrafica) {
+            miGrafica.destroy();
+            miGrafica = null;
+        }
+    }
+
+    // Eventos asignados directamente por script al cargar la página
+    window.onload = function() {
+        var btnCalcular = document.getElementById('btnCalcular');
+        var btnLimpiar = document.getElementById('btnLimpiar');
+
+        if (btnCalcular) {
+            btnCalcular.onclick = calcularPuntoEquilibrio;
+        }
+        if (btnLimpiar) {
+            btnLimpiar.onclick = limpiarFormulario;
+        }
+    };
+</script>
+
+</body>
+</html>
